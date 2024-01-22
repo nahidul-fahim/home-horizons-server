@@ -32,11 +32,24 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
+
         // Database and collection
         const usersCollection = client.db("horizonHomes").collection("registeredUsers");
 
 
 
+
+        // post new user data
+        app.post("/newUser", async (req, res) => {
+            const newUserData = req.body;
+            const query = { email: newUserData?.email };
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: "Email already exists", insertedId: null })
+            }
+            const result = await usersCollection.insertOne(newUserData);
+            res.send(result);
+        })
 
 
 
