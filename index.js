@@ -39,7 +39,7 @@ async function run() {
 
 
 
-        // post new user data
+        // post new user data and duplicate email validation
         app.post("/newUser", async (req, res) => {
             const newUserData = req.body;
             const query = { email: newUserData?.email };
@@ -49,6 +49,24 @@ async function run() {
             }
             const result = await usersCollection.insertOne(newUserData);
             res.send(result);
+        })
+
+
+        // get data to login a user
+        app.post("/loginUser", async (req, res) => {
+            const loginData = req.body;
+            console.log(loginData);
+            const email = loginData?.email;
+            const password = loginData?.password;
+            const query = { email: email };
+            const existingUser = await usersCollection.findOne(query);
+            if (!existingUser) {
+                return res.send({ login: false, message: "No user found" })
+            }
+            if (existingUser?.password !== password) {
+                return res.send({ login: false, message: "Please recheck your email and password" })
+            }
+            res.send({ login: true, existingUser });
         })
 
 
