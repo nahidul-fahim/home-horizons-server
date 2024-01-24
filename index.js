@@ -36,6 +36,7 @@ async function run() {
         // Database and collection
         const usersCollection = client.db("horizonHomes").collection("registeredUsers");
         const allHousesCollection = client.db("horizonHomes").collection("allHouses");
+        const rentedListCollection = client.db("horizonHomes").collection("rentedList");
 
 
 
@@ -88,6 +89,15 @@ async function run() {
 
 
 
+        // post new house rent data
+        app.post("/houseRent", async (req, res) => {
+            const houseRentData = req.body;
+            const result = await rentedListCollection.insertOne(houseRentData);
+            res.send(result);
+        })
+
+
+
         // get data to login a user
         app.post("/loginUser", async (req, res) => {
             const loginData = req.body;
@@ -131,6 +141,24 @@ async function run() {
 
 
 
+        // get all house (paginated)
+        app.get("/allHouse", async (req, res) => {
+            const result = await allHousesCollection.find().toArray();
+            res.send(result);
+        })
+
+
+
+        // get all bookings for user
+        app.get("/userBookings/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = {renterId: id}
+            const result = await rentedListCollection.find(query).toArray();
+            res.send(result);
+        })
+
+
+
         // update a single house
         app.put("/updateHouse/:id", async (req, res) => {
             const id = req.params.id;
@@ -157,7 +185,6 @@ async function run() {
 
 
 
-
         // delete a house
         app.delete("/deleteHouse/:id", async (req, res) => {
             const id = req.params.id;
@@ -167,6 +194,14 @@ async function run() {
         })
 
 
+
+        // delete a booking
+        app.delete("/deleteBooking/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await rentedListCollection.deleteOne(query);
+            res.send(result);
+        })
 
 
 
